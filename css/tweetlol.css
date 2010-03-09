@@ -212,3 +212,8 @@ div.entry p.retweet {
     padding: 0 0 0.2em 0;
     border-bottom: 1px solid #448;
 }
+
+/* jQui custom overrides */
+.ui-widget { font-family: Helvetica, Arial, sans-serif; font-size: 0.9em; }
+.ui-tabs .ui-tabs-nav li a { padding: .2em .6em; }
+.ui-state-hover a, .ui-state-hover a:hover { color: #000; background-color: #ccc; }

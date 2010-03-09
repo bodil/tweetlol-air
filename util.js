@@ -1,23 +1,12 @@
 var Tweetlol = {
+    
+    Event: {
+        APP_INIT: "tweetlol.app_init"
+    },
+    
+    app: air.NativeApplication.nativeApplication,
 
     log: air.trace,
-    
-    extend: function(destination, source) {
-        destination = destination || {};
-        if(source) {
-            for(var property in source) {
-                var value = source[property];
-                if(value !== undefined) {
-                    destination[property] = value;
-                }
-            }
-    
-            if(source.hasOwnProperty && source.hasOwnProperty('toString')) {
-                destination.toString = source.toString;
-            }
-        }
-        return destination;
-    },
     
     prefs: {
         accounts: [
@@ -36,19 +25,24 @@ var Tweetlol = {
      */
     init: function() {
         // Setup for shutdown
-        air.NativeApplication.nativeApplication.addEventListener(air.Event.EXITING, Tweetlol.shutdown);
+        Tweetlol.app.addEventListener(air.Event.EXITING, Tweetlol.shutdown);
         
         // Read prefs
         if (Tweetlol.prefsFile.exists) {
             var prefsStream = new air.FileStream();
             prefsStream.open(Tweetlol.prefsFile, air.FileMode.READ);
             var newPrefs = prefsStream.readObject();
-            Tweetlol.extend(Tweetlol.prefs, newPrefs);
+            $.extend(true, Tweetlol.prefs, newPrefs);
             prefsStream.close();
         }
+        
+        // Signal listeners that app is ready
+        Tweetlol.app.dispatchEvent(new air.Event(Tweetlol.Event.APP_INIT));
     },
 
-    // Called when app is shutting down    
+    /**
+     * Called when app is shutting down.
+     */
     shutdown: function() {
         // Store prefs
         var prefsStream = new air.FileStream();
