@@ -59,28 +59,8 @@ Tweetlol.runPrefsDialog = function() {
         var height = document.documentElement.clientHeight;
         height -= $("ul.tabbar").outerHeight();
         height -= $("div.toolbar").outerHeight();
-        $("div.view").height(height);
+        $("div.view").height(height - 24);
     }
     
-    function updateTabs() {
-        // var old = activeTab;
-        $("ul.tabbar li").each(function() {
-            var view = $("#" + $(this).attr("id") + "View");
-            if ($(this).hasClass("active")) {
-                // activeTab = $(this).attr("id");
-                $(view).show();
-            }
-            else $(view).hide();
-        });
-        /*
-        if (old != activeTab) {
-            var last = lastUpdate[activeTab];
-            var now = new Date().getTime();
-            last += 60000 * Tweetlol.prefs.getIntPref("refreshInterval");
-            if (last < now) refreshTweets();
-        }
-        */
-    }
-
 })();
 

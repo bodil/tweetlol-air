@@ -16,6 +16,10 @@ a:hover {
     background-color: #113;
 }
 
+div#tabs {
+    height: 100%;
+}
+
 div.view {
     overflow-y: scroll;
 }
@@ -61,25 +65,6 @@ div.dialog .error {
     cursor: pointer;
     background-color: #444;
     padding: 0.1em;
-}
-
-ul.tabbar {
-    margin: 0;
-    padding: 0.4em 0 0.2em 0;
-    border-bottom: 1px solid #777;
-    cursor: default;
-}
-
-ul.tabbar li {
-    display: inline;
-    margin: 0 0 0 0.4em;
-    padding: 0.2em 0.4em;
-    background-color: #444;
-    cursor: pointer;
-}
-
-ul.tabbar li:hover, ul.tabbar li.active {
-    background-color: #777;
 }
 
 ul.entries {
