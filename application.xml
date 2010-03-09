@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<application xmlns="http://ns.adobe.com/air/application/1.5.3">
+
+	<id>net.tweetlol</id>
+	<name>Tweetlol Desktop</name>
+	<version>0.1</version>
+	<filename>Tweetlol</filename>
+	<description>lol @ twitter</description>
+	<copyright>Copyright 2010 Bodil Stokke</copyright>
+	
+	<icon>
+		<image32x32>icons/tweetlol.png</image32x32>
+	</icon>
+
+	<initialWindow>
+
+		<title>Tweetlol</title>
+		<content>tweetlol.html</content>
+		<systemChrome>standard</systemChrome>
+		<transparent>false</transparent>
+		<visible>true</visible>
+		<width>200</width>
+		<height>480</height>
+		<minSize>150 150</minSize>
+
+  </initialWindow>
+
+</application>
