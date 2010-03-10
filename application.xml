@@ -18,7 +18,7 @@
 		<content>tweetlol.html</content>
 		<systemChrome>standard</systemChrome>
 		<transparent>false</transparent>
-		<visible>true</visible>
+		<visible>false</visible>
 		<width>200</width>
 		<height>480</height>
 		<minSize>150 150</minSize>

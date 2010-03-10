@@ -18,6 +18,23 @@ Tweetlol.runPrefsDialog = function() {
  */
 (function() {
     Tweetlol.app.addEventListener(Tweetlol.Event.APP_INIT, function() {
+        if (Tweetlol.prefs.windowState) {
+            var state = Tweetlol.prefs.windowState;
+            window.nativeWindow.bounds = new air.Rectangle(state.x, state.y, state.width, state.height);
+            switch (window.nativeWindow.displayState) {
+                case air.NativeWindowDisplayState.MINIMIZED:
+                    window.nativeWindow.minimize();
+                    break;
+                case air.NativeWindowDisplayState.MAXIMIZED:
+                    window.nativeWindow.maximize();
+                    break;
+            }
+        }
+        window.nativeWindow.activate();
+        window.nativeWindow.addEventListener(air.NativeWindowDisplayStateEvent.DISPLAY_STATE_CHANGE, windowStateChanged);
+        window.nativeWindow.addEventListener(air.NativeWindowBoundsEvent.MOVE, windowStateChanged);
+        window.nativeWindow.addEventListener(air.NativeWindowBoundsEvent.RESIZE, windowStateChanged);
+        
         $("#tabs").tabs();
         $("#tweetbox").keyup(tweetInput);
         $("#tweetbox").keydown(tweetInputVerify);
@@ -46,13 +63,19 @@ Tweetlol.runPrefsDialog = function() {
             len = len.toString() + "!";
         */
         $("div.toolbar span.tweet").text(len);
-        if (replyingTo && len == 0) replyingTo = null;
+        // if (replyingTo && len == 0) replyingTo = null;
     }
     
     function getInputCount() {
         var tweet = $("#tweetbox").val();
         // tweet = gsub(tweet, urlRe, function(match) { return shortenUrl(match[0]) });
         return tweet.length;
+    }
+    
+    function windowStateChanged() {
+        var w = window.nativeWindow;
+        Tweetlol.prefs.windowState = { x: w.x, y: w.y, width: w.width, height: w.height, displayState: w.displayState };
+        updateLayout();
     }
     
     function updateLayout() {
