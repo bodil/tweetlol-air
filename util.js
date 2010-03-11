@@ -1,7 +1,8 @@
 var Tweetlol = {
     
     Event: {
-        APP_INIT: "tweetlol.app_init"
+        APP_INIT: "tweetlol.app_init",
+        APP_EXIT: "tweetlol.app_exit"
     },
     
     app: air.NativeApplication.nativeApplication,
@@ -44,6 +45,8 @@ var Tweetlol = {
      * Called when app is shutting down.
      */
     shutdown: function() {
+        // Notify listeners that app is exiting
+        Tweetlol.app.dispatchEvent(new air.Event(Tweetlol.Event.APP_EXIT));
         // Store prefs
         var prefsStream = new air.FileStream();
         prefsStream.open(Tweetlol.prefsFile, air.FileMode.WRITE);
