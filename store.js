@@ -5,6 +5,7 @@ Tweetlol.Store = Class.extend({
     runningQuery: null,
     connected: false,
     begun: false,
+    notifyQueue: [],
     
     init: function(reference) {
         this.connection = new air.SQLConnection();
@@ -74,9 +75,41 @@ Tweetlol.Store = Class.extend({
         this.pushQuery("create unique index if not exists users_id on users (id, service)");
         this.pushQuery("create unique index if not exists users_name on users (screen_name, service)");
         this.pushQuery("create index if not exists posts_date_desc on posts (created_at desc)");
+    },
+    
+    insertPosts: function(posts) {
+        for (var i = 0, l = posts.length; i < l; i++) {
+            this.insertPost(posts[i], i === (l - 1));
+        }
+    },
+    
+    insertPost: function(post, notify) {
+        var sql = "insert or ignore into posts (id, service, created_at, text, source, in_reply_to_status_id, in_reply_to_user_id, " +
+                  "favorited, in_reply_to_screen_name, retweeted_status, user, geo) values (:id, :service, :created_at, :text, :source, " + 
+                  ":in_reply_to_status_id, :in_reply_to_user_id, :favorited, :in_reply_to_screen_name, :retweeted_status, :user, :geo)";
+        var params = {
+            id: post.id,
+            service: "bodiltest@twitter.com",
+            created_at: Tweetlol.parseDate(post.created_at),
+            text: post.text,
+            source: post.source,
+            in_reply_to_status_id: post.in_reply_to_status_id,
+            in_reply_to_user_id: post.in_reply_to_user_id,
+            favorited: post.favorited,
+            in_reply_to_screen_name: post.in_reply_to_screen_name,
+            retweeted_status: post.retweeted_status,
+            user: post.user.id,
+            geo: post.geo
+        };
+        this.pushQuery(sql, params);
     }
 });
 
 Tweetlol.app.addEventListener(Tweetlol.Event.APP_INIT, function() {
     Tweetlol.Store.store = new Tweetlol.Store(air.File.applicationStorageDirectory.resolvePath("store.db"));
+    var f = new air.FileStream();
+    f.open(air.File.applicationDirectory.resolvePath("fixture.json"), air.FileMode.READ);
+    var data = jsonParse(f.readUTFBytes(f.bytesAvailable));
+    f.close();
+    Tweetlol.Store.store.insertPosts(data, "bodiltest@twitter.com");
 });
