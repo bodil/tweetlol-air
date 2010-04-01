@@ -109,7 +109,7 @@ Tweetlol.app.addEventListener(Tweetlol.Event.APP_INIT, function() {
     Tweetlol.Store.store = new Tweetlol.Store(air.File.applicationStorageDirectory.resolvePath("store.db"));
     var f = new air.FileStream();
     f.open(air.File.applicationDirectory.resolvePath("fixture.json"), air.FileMode.READ);
-    var data = jsonParse(f.readUTFBytes(f.bytesAvailable));
+    var data = json_parse(f.readUTFBytes(f.bytesAvailable));
     f.close();
     Tweetlol.Store.store.insertPosts(data, "bodiltest@twitter.com");
 });
