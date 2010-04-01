@@ -1,4 +1,3 @@
-alert('IMPORTANT: Remove this line from json_parse.js before deployment.');
 /*
     http://www.JSON.org/json_parse.js
     2009-05-31
