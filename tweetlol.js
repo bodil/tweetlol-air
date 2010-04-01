@@ -54,3 +54,11 @@ var Tweetlol = {
     }
 };
 
+Tweetlol.Class = Class.extend({
+    toString: function() {
+        return "<" + this.CLASS_NAME + ">";
+    },
+    
+    CLASS_NAME: "Tweetlol.Class"
+});
+
