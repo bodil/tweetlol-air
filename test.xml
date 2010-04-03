@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<application xmlns="http://ns.adobe.com/air/application/1.5.3">
+
+	<id>net.tweetlol</id>
+	<name>Tweetlol Test Suite</name>
+	<version>0.1</version>
+	<filename>TweetlolTest</filename>
+	<description>Test suite</description>
+	<copyright>Copyright 2010 Bodil Stokke</copyright>
+	
+	<icon>
+		<image32x32>icons/tweetlol.png</image32x32>
+	</icon>
+
+	<initialWindow>
+
+		<title>Tweetlol Test Suite</title>
+		<content>test.html</content>
+		<systemChrome>standard</systemChrome>
+		<transparent>false</transparent>
+		<visible>false</visible>
+		<width>640</width>
+		<height>480</height>
+
+  </initialWindow>
+
+</application>
