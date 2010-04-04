@@ -156,17 +156,17 @@ Tweetlol.Store = Tweetlol.Database.extend({
     
     createTables: function() {
         var creator = new Tweetlol.Transaction();
-        creator.push("create table if not exists users (id TEXT NOT NULL, service TEXT NOT NULL, name TEXT NOT NULL, " +
+        creator.push("CREATE TABLE IF NOT EXISTS users (id TEXT NOT NULL, service TEXT NOT NULL, name TEXT NOT NULL, " +
                      "screen_name TEXT, location TEXT, description TEXT, profile_image_url TEXT, url TEXT, protected BOOLEAN, " +
                      "followers_count INTEGER, friends_count INTEGER, created_at INTEGER, utc_offset INTEGER, time_zone TEXT, " +
                      "statuses_count INTEGER, geo_enabled BOOLEAN, verified BOOLEAN, following BOOLEAN)");
-        creator.push("create table if not exists posts (id TEXT NOT NULL, service TEXT, created_at INTEGER NOT NULL, " +
+        creator.push("CREATE TABLE IF NOT EXISTS posts (id TEXT NOT NULL, service TEXT, created_at INTEGER NOT NULL, " +
                      "text TEXT NOT NULL, source TEXT, truncated BOOLEAN, in_reply_to_status_id TEXT, in_reply_to_user_id TEXT, " +
                      "favorited BOOLEAN, in_reply_to_screen_name TEXT, retweeted_status TEXT, user TEXT NOT NULL, geo TEXT)");
-        creator.push("create unique index if not exists posts_id on posts (id, service)");
-        creator.push("create unique index if not exists users_id on users (id, service)");
-        creator.push("create unique index if not exists users_name on users (screen_name, service)");
-        creator.push("create index if not exists posts_date_desc on posts (created_at desc)");
+        creator.push("CREATE UNIQUE INDEX IF NOT EXISTS posts_id ON posts (id, service)");
+        creator.push("CREATE UNIQUE INDEX IF NOT EXISTS users_id ON users (id, service)");
+        creator.push("CREATE UNIQUE INDEX IF NOT EXISTS users_name ON users (screen_name, service)");
+        creator.push("CREATE INDEX IF NOT EXISTS posts_date_desc ON posts (created_at desc)");
         this.pushTransaction(creator);
     },
     
@@ -216,8 +216,8 @@ Tweetlol.Store = Tweetlol.Database.extend({
             callback(null);
         });
         posts.forEach(function(post) {
-            var sql = "insert or ignore into posts (id, service, created_at, text, source, in_reply_to_status_id, in_reply_to_user_id, " +
-                      "favorited, in_reply_to_screen_name, retweeted_status, user, geo) values (:id, :service, :created_at, :text, :source, " + 
+            var sql = "INSERT OR IGNORE INTO posts (id, service, created_at, text, source, in_reply_to_status_id, in_reply_to_user_id, " +
+                      "favorited, in_reply_to_screen_name, retweeted_status, user, geo) VALUES (:id, :service, :created_at, :text, :source, " + 
                       ":in_reply_to_status_id, :in_reply_to_user_id, :favorited, :in_reply_to_screen_name, :retweeted_status, :user, :geo)";
             function s(o) {
                 if (o !== null) {
