@@ -61,6 +61,52 @@ var testSuites = {
             transaction.push("crash please");
             test.db.pushTransaction(transaction);
         }
+    }),
+    
+    "Twitter db store": new TestSuite().setup(function() {
+        this.dbFile = air.File.createTempFile();
+        this.db = new Tweetlol.Store(this.dbFile);
+        var f = new air.FileStream();
+        f.open(air.File.applicationDirectory.resolvePath("tests/fixture.json"), air.FileMode.READ);
+        this.fixture = JSON.parse(f.readUTFBytes(f.bytesAvailable));
+        f.close();
+    }).teardown(function() {
+        this.db.close();
+        this.db = null;
+        this.dbFile.deleteFile();
+    }).addTests({
+        "insert a stream of tweets": function(assert, finished, test) {
+            test.numAssertionsExpected = 4;
+            var expected = ["10326467059::test_service",
+                            "10325637869::test_service",
+                            "10325622017::test_service",
+                            "10324719514::test_service",
+                            "10324337764::test_service"];
+            var eventHandler = function(event) {
+                var result = JSON.parse(event.data);
+                assert.ok(result);
+                assert.deepEqual(expected, result)
+                Tweetlol.app.removeEventListener(Tweetlol.Event.TWEETS_AVAILABLE, eventHandler);
+                finished();
+            };
+            Tweetlol.app.addEventListener(Tweetlol.Event.TWEETS_AVAILABLE, eventHandler);
+            test.db.insertPosts(test.fixture, "test_service", function(result) {
+                assert.ok(result);
+                assert.deepEqual(expected, result)
+            });
+        },
+        "read a list of tweets from the store": function(assert, finished, test) {
+            test.db.insertPosts(test.fixture, "test_service", function(result) {
+                test.db.getPosts(["10326467059::test_service"], function(posts) {
+                    assert.ok(posts);
+                    assert.equal(posts.length, 1);
+                    var post = posts[0];
+                    assert.equal(post.id, "10326467059");
+                    assert.equal(post.created_at.getTime(), Tweetlol.parseDate("Thu Mar 11 15:22:11 +0000 2010").getTime());
+                    finished();
+                });
+            });
+        }
     })
 };
 

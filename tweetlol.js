@@ -2,7 +2,8 @@ var Tweetlol = {
     
     Event: {
         APP_INIT: "tweetlol.app_init",
-        APP_EXIT: "tweetlol.app_exit"
+        APP_EXIT: "tweetlol.app_exit",
+        TWEETS_AVAILABLE: "tweetlol.tweets_available"
     },
     
     app: air.NativeApplication.nativeApplication,

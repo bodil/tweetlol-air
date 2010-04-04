@@ -158,9 +158,9 @@ Tweetlol.Store = Tweetlol.Database.extend({
         var creator = new Tweetlol.Transaction();
         creator.push("create table if not exists users (id TEXT NOT NULL, service TEXT NOT NULL, name TEXT NOT NULL, " +
                      "screen_name TEXT, location TEXT, description TEXT, profile_image_url TEXT, url TEXT, protected BOOLEAN, " +
-                     "followers_count INTEGER, friends_count INTEGER, created_at DATETIME, utc_offset INTEGER, time_zone TEXT, " +
+                     "followers_count INTEGER, friends_count INTEGER, created_at INTEGER, utc_offset INTEGER, time_zone TEXT, " +
                      "statuses_count INTEGER, geo_enabled BOOLEAN, verified BOOLEAN, following BOOLEAN)");
-        creator.push("create table if not exists posts (id TEXT NOT NULL, service TEXT, created_at DATETIME NOT NULL, " +
+        creator.push("create table if not exists posts (id TEXT NOT NULL, service TEXT, created_at INTEGER NOT NULL, " +
                      "text TEXT NOT NULL, source TEXT, truncated BOOLEAN, in_reply_to_status_id TEXT, in_reply_to_user_id TEXT, " +
                      "favorited BOOLEAN, in_reply_to_screen_name TEXT, retweeted_status TEXT, user TEXT NOT NULL, geo TEXT)");
         creator.push("create unique index if not exists posts_id on posts (id, service)");
@@ -170,24 +170,73 @@ Tweetlol.Store = Tweetlol.Database.extend({
         this.pushTransaction(creator);
     },
     
-    insertPosts: function(posts) {
-        var insert = new Tweetlol.Transaction();
-        $.each(posts, function(index, post) {
+    makePostId: function(id, service) {
+        return id + "::" + service;
+    },
+    
+    parsePostId: function(postId) {
+        var flarp = postId.split("::");
+        return { id: flarp[0], service: flarp[1] };
+    },
+    
+    postprocessPostResult: function(result) {
+        return $.map(result, function(tweet) {
+            tweet.created_at = new Date(tweet.created_at);
+            return tweet;
+        });
+    },
+    
+    getPosts: function(ids, callback) {
+        var transaction = new Tweetlol.Transaction($.proxy(function(transaction) {
+            callback(this.postprocessPostResult(transaction.results[0].data));
+        }, this), function(transaction) {
+            callback(null);
+        });
+        var query = [], args = {};
+        $.each(ids, $.proxy(function(index, postId) {
+            query.push("(id = :id" + index + " AND service = :service" + index + ")");
+            var id = this.parsePostId(postId);
+            args["id" + index] = id.id;
+            args["service" + index] = id.service;
+        }, this));
+        var sql = "SELECT * FROM posts WHERE " + query.join(" OR ");
+        transaction.push(sql, args);
+        this.pushTransaction(transaction);
+    },
+    
+    insertPosts: function(posts, service, callback) {
+        var ids = $.map(posts, $.proxy(function(post) {
+            return this.makePostId(post.id, service);
+        }, this));
+        var insert = new Tweetlol.Transaction(function(transaction) {
+            callback(ids);
+            Tweetlol.app.dispatchEvent(new air.DataEvent(Tweetlol.Event.TWEETS_AVAILABLE,
+                                                         false, false, JSON.stringify(ids)));
+        }, function(transaction) {
+            callback(null);
+        });
+        posts.forEach(function(post) {
             var sql = "insert or ignore into posts (id, service, created_at, text, source, in_reply_to_status_id, in_reply_to_user_id, " +
                       "favorited, in_reply_to_screen_name, retweeted_status, user, geo) values (:id, :service, :created_at, :text, :source, " + 
                       ":in_reply_to_status_id, :in_reply_to_user_id, :favorited, :in_reply_to_screen_name, :retweeted_status, :user, :geo)";
+            function s(o) {
+                if (o !== null) {
+                    return o.toString();
+                }
+                return null;
+            }
             var params = {
-                id: post.id,
-                service: "bodiltest@twitter.com",
-                created_at: Tweetlol.parseDate(post.created_at),
+                id: s(post.id),
+                service: service,
+                created_at: Tweetlol.parseDate(post.created_at).getTime(),
                 text: post.text,
                 source: post.source,
-                in_reply_to_status_id: post.in_reply_to_status_id,
-                in_reply_to_user_id: post.in_reply_to_user_id,
+                in_reply_to_status_id: s(post.in_reply_to_status_id),
+                in_reply_to_user_id: s(post.in_reply_to_user_id),
                 favorited: post.favorited,
                 in_reply_to_screen_name: post.in_reply_to_screen_name,
                 retweeted_status: post.retweeted_status,
-                user: post.user.id,
+                user: s(post.user.id),
                 geo: post.geo
             };
             insert.push(sql, params);
