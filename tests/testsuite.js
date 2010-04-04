@@ -52,6 +52,10 @@ var testSuites = {
 };
 
 runSuites(testSuites, function(stats) {
+    air.trace(stats.numSuites + " suites run, " + stats.numFailed + " failed.");
+    if (stats.numFailed) {
+        air.trace("\n*** TESTS FAILING!!!!!!!1\n");
+    }
     air.NativeApplication.nativeApplication.dispatchEvent(new air.Event(air.Event.EXITING));
-    air.NativeApplication.nativeApplication.exit(0);
+    air.NativeApplication.nativeApplication.exit(stats.numFailed);
 });
