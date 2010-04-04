@@ -1,29 +1,57 @@
-/*
-test("a test", function() {
-    equals("hello kitty", "hello " + "kitty");
-});
-*/
-
-var suite = new TestSuite("my test suite");
-suite.addTests({
-    "simple synchronous test": function(assert) {
-        assert.ok(true);
-    },
-    
-    "timer test": function(assert, finished, test) {
-        test.numAssertionsExpected = 1;
-        var timer = new air.Timer(100, 1);
-        timer.addEventListener(air.TimerEvent.TIMER, function() {
+var testSuites = {
+    "test framework consistency tests": new TestSuite().addTests({
+        "simple synchronous test": function(assert) {
             assert.ok(true);
-            finished();
-        });
-        timer.start();
-    }
-});
+        },
+        
+        "timer test": function(assert, finished, test) {
+            test.numAssertionsExpected = 1;
+            var timer = new air.Timer(100, 1);
+            timer.addEventListener(air.TimerEvent.TIMER, function() {
+                assert.ok(true);
+                finished();
+            });
+            timer.start();
+        }
+    }),
 
-suite.runTests(function() {
+    "SQL store": new TestSuite().setup(function() {
+        this.dbFile = air.File.createTempFile();
+        this.db = new Tweetlol.Database(this.dbFile);
+    }).teardown(function() {
+        this.db.close();
+        this.db = null;
+        this.dbFile.deleteFile();
+    }).addTests({
+        "setup and perform basic query": function(assert, finished, test) {
+            var transaction = new Tweetlol.Transaction(function(t) {
+                var result = t.results[2];
+                assert.ok(result);
+                assert.ok(result.complete, "select statement completed");
+                assert.equal(result.data.length, 1);
+                assert.equal(result.data[0].foo, "bar");
+                finished();
+            }, function() {
+                assert.ok(false, "transaction failed");
+            });
+            transaction.push("create table test (foo TEXT NOT NULL)");
+            transaction.push("insert into test (foo) values (:foo)", { "foo": "bar" });
+            transaction.push("select foo from test");
+            test.db.pushTransaction(transaction);
+        },
+        "transaction failure": function(assert, finished, test) {
+            var transaction = new Tweetlol.Transaction(function() {
+                assert.ok(false, "transaction succeeded - was supposed to fail");
+            }, function() {
+                finished();
+            });
+            transaction.push("crash please");
+            test.db.pushTransaction(transaction);
+        }
+    })
+};
+
+runSuites(testSuites, function(stats) {
     air.NativeApplication.nativeApplication.dispatchEvent(new air.Event(air.Event.EXITING));
     air.NativeApplication.nativeApplication.exit(0);
 });
-
-

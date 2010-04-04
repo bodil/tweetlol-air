@@ -10,6 +10,7 @@ Tweetlol.Transaction = Tweetlol.Class.extend({
         this.failed = false;
         this.statementIndex = null;
         this.transactionId = Tweetlol.Transaction.idCounter++;
+        this.results = [];
     },
     
     beginTransaction: function(store) {
@@ -22,20 +23,20 @@ Tweetlol.Transaction = Tweetlol.Class.extend({
     onFail: function() {
         this.failed = true;
         if (this.begun) {
-            this.store.rollback(new air.Responder($.proxy(this.onRollbackComplete, this),
-                                                  $.proxy(this.fail, this)));
+            this.store.connection.rollback(new air.Responder($.proxy(this.onRollbackComplete, this),
+                                                             $.proxy(this.fail, this)));
         } else {
             this.fail();
         }
     },
     
     onRollbackComplete: function() {
+        air.trace("Transaction failed and rolled back ", this);
         this.rolledBack = true;
         this.fail();
     },
     
     fail: function() {
-        air.trace("Transaction failed!!!1");
         if (this.store) this.store.onTransactionFailed(this);
         if (this.errorCallback) this.errorCallback(this);
     },
@@ -45,7 +46,8 @@ Tweetlol.Transaction = Tweetlol.Class.extend({
         this.doNextStatement();
     },
     
-    onStatementComplete: function() {
+    onStatementComplete: function(result) {
+        this.results.push(result);
         this.doNextStatement();
     },
     
@@ -85,6 +87,7 @@ Tweetlol.Transaction = Tweetlol.Class.extend({
             }
         }
         this.statements.push(statement);
+        return this;
     },
     
     toString: function() {
@@ -105,10 +108,12 @@ Tweetlol.Database = Tweetlol.Class.extend({
     init: function(reference) {
         this.connection = new air.SQLConnection();
         this.connection.openAsync(reference, air.SQLMode.CREATE, new air.Responder($.proxy(this.onDatabaseReady,this), $.proxy(this.onDatabaseFailed, this)));
-        Tweetlol.app.addEventListener(Tweetlol.Event.APP_EXIT, $.proxy(function() {
-            this.connection.close();
-            this.connected = false;
-        }, this));
+        Tweetlol.app.addEventListener(Tweetlol.Event.APP_EXIT, $.proxy(this.close, this));
+    },
+    
+    close: function() {
+        this.connection.close();
+        this.connected = false;
     },
     
     onDatabaseReady: function() {
