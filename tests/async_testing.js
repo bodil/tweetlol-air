@@ -36,10 +36,6 @@ var assert = {
             this.expected = options.expected;
             this.operator = options.operator;
             var stackStartFunction = options.stackStartFunction || assert.fail;
-            
-            if (Error.captureStackTrace) {
-                Error.captureStackTrace(this, stackStartFunction);
-            }
         },
         
         toString: function() {
@@ -147,9 +143,10 @@ var Test = Class.extend({
             output += ': \n';
         }
         
-        if (this.__failure.stack) {
-            this.__failure.stack.split("\n").forEach(function(line) {
-                output += '  ' + line + '\n';
+        if (this.__failure.stackTrace) {
+            output += '  ' + this.__failure + '\n';
+            this.__failure.stackTrace.forEach(function(line) {
+                output += '    ' + line.sourceURL + ':' + line.line + ' ' + line.functionName + '\n';
             });
             
         } else {
