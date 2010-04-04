@@ -6,13 +6,26 @@ var testSuites = {
         
         "timer test": function(assert, finished, test) {
             test.numAssertionsExpected = 1;
-            var timer = new air.Timer(100, 1);
+            var timer = new air.Timer(1, 1);
             timer.addEventListener(air.TimerEvent.TIMER, function() {
                 assert.ok(true);
                 finished();
             });
             timer.start();
-        }
+        },
+        
+        "assert test": function(assert) {
+            assert.ok(true);
+            assert.equal(1, "1");
+            assert.equal(1337, 1337);
+            assert.notEqual(2+2, 5);
+            assert.equal("foo", "foo");
+            assert.notEqual([1,2,3], [1,2,3]);
+            assert.deepEqual([1,2,3], [1,2,3]);
+            assert.deepEqual({ foo: "blerk" }, { "foo": "blerk" });
+            assert.ok(!window.assert._deepEqual({ foo: "blerk" }, { foo: "quux" }));
+            assert.ok(!window.assert._deepEqual([1,2,3], [1,2,5]));
+        },
     }),
 
     "SQL store": new TestSuite().setup(function() {
