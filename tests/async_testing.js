@@ -384,7 +384,7 @@ var runSuites = function(module, callback) {
         var suite = suites.shift();
         suite.runTests(function() {
             if (suites.length > 0) {
-                sys.error('----------------------------------\n');
+                air.trace('----------------------------------\n');
             }
             stats.numSuites++;
             if (suite.numFailedTests > 0) {
@@ -393,7 +393,7 @@ var runSuites = function(module, callback) {
             runNextSuite();
         });
     }
-    
-    sys.puts('');
+
+    air.trace("");    
     runNextSuite();
 };
